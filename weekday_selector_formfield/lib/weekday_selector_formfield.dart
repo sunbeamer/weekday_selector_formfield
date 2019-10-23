@@ -28,11 +28,16 @@ class WeekDaySelectorFormField extends StatefulWidget {
       this.initialValue,
       this.textStyle = const TextStyle(color: Colors.black),
       this.errorTextStyle = const TextStyle(color: Colors.red),
-      this.mainAxisAlignment = MainAxisAlignment.spaceBetween,
-      this.mainAxisSize = MainAxisSize.min,
-      this.crossAxisAlignment = CrossAxisAlignment.center,
+      this.axis = Axis.horizontal,
+      this.crossAxisAlignment = WrapCrossAlignment.center,
+      this.alignment = WrapAlignment.start,
       this.borderRadius = 8,
-      this.elevation = 4.0})
+      this.elevation = 4.0,
+      this.spacing = 5,
+      this.runSpacing = 5,
+      this.dayLong = 3,
+      this.boxConstraints = const BoxConstraints(
+          minWidth: 40, minHeight: 40, maxWidth: 40, maxHeight: 40)})
       : super(key: key);
 
   final List<days> initialValue;
@@ -48,13 +53,17 @@ class WeekDaySelectorFormField extends StatefulWidget {
   final BorderSide borderSide;
   final TextStyle textStyle;
   final TextStyle errorTextStyle;
-  final MainAxisAlignment mainAxisAlignment;
-  final CrossAxisAlignment crossAxisAlignment;
-  final MainAxisSize mainAxisSize;
+  final WrapCrossAlignment crossAxisAlignment;
+  final Axis axis;
   final bool autovalidate;
   final bool enabled;
   final double borderRadius;
   final double elevation;
+  final double runSpacing;
+  final double spacing;
+  final WrapAlignment alignment;
+  final int dayLong;
+  final BoxConstraints boxConstraints;
 
   static const workDays = [
     days.monday,
@@ -78,15 +87,6 @@ class _WeekDaySelectorFormFieldState extends State<WeekDaySelectorFormField> {
   List<Widget> displayedDays = [];
   List<days> daysSelected = [];
 
-  var languages = [
-    {lang.en: 'Mon', lang.es: 'Lun', lang.pt: 'Seg'}, // monday
-    {lang.en: 'Tue', lang.es: 'Mar', lang.pt: 'Ter'}, // tuesday
-    {lang.en: 'Wen', lang.es: 'Mie', lang.pt: 'Qua'}, // wednesday
-    {lang.en: 'Thu', lang.es: 'Jue', lang.pt: 'Qui'}, // thursday
-    {lang.en: 'Fri', lang.es: 'Vie', lang.pt: 'Sex'}, // friday
-    {lang.en: 'Sat', lang.es: 'Sab', lang.pt: 'Sab'}, // thursday
-    {lang.en: 'Sun', lang.es: 'Dom', lang.pt: 'Dom'} // saturday
-  ];
   @override
   void initState() {
     super.initState();
@@ -107,6 +107,8 @@ class _WeekDaySelectorFormFieldState extends State<WeekDaySelectorFormField> {
         splashColor: this.widget.splashColor,
         borderRadius: this.widget.borderRadius,
         elevation: this.widget.elevation,
+        dayLong: this.widget.dayLong,
+        boxConstraints: widget.boxConstraints,
         selected: widget.initialValue == null
             ? false
             : widget.initialValue
@@ -136,24 +138,29 @@ class _WeekDaySelectorFormFieldState extends State<WeekDaySelectorFormField> {
       initialValue: widget.initialValue,
       autovalidate: widget.autovalidate,
       onSaved: (days) {
-        if (widget.onSaved != null) widget.onSaved(days);
+        print("SELECTOR SAVE: " + daysSelected.toString());
+        if (widget.onSaved != null) widget.onSaved(daysSelected);
       },
       validator: (days) {
-        if (widget.validator != null) return widget.validator(days);
+        print("SELECTOR VALIDATOR: " + daysSelected.toString());
+        if (widget.validator != null) return widget.validator(daysSelected);
         return null;
       },
       builder: (state) {
         return Column(
           children: <Widget>[
-            Row(
-              crossAxisAlignment: widget.crossAxisAlignment,
-              mainAxisAlignment: widget.mainAxisAlignment,
-              mainAxisSize: widget.mainAxisSize,
-              children: displayedDays,
+            Container(
+              child: Wrap(
+                children: displayedDays,
+                alignment: widget.alignment,
+                direction: widget.axis,
+                crossAxisAlignment: widget.crossAxisAlignment,
+                spacing: widget.spacing,
+                runSpacing: widget.runSpacing,
+              ),
             ),
             state.hasError
-                ? Text(state.errorText,
-                    style: this.widget.errorTextStyle)
+                ? Text(state.errorText, style: this.widget.errorTextStyle)
                 : Container()
           ],
         );
@@ -176,7 +183,9 @@ class _DayItem extends StatefulWidget {
       this.splashColor,
       this.selected = false,
       this.borderRadius,
-      this.elevation})
+      this.elevation,
+      this.dayLong,
+      this.boxConstraints})
       : super(key: key);
   final selected;
   final Color fillColor;
@@ -190,7 +199,8 @@ class _DayItem extends StatefulWidget {
   final Color highlightColor;
   final double borderRadius;
   final double elevation;
-
+  final int dayLong;
+  final BoxConstraints boxConstraints;
   __DayItemState createState() => __DayItemState();
 }
 
@@ -199,7 +209,6 @@ class __DayItemState extends State<_DayItem> {
 
   @override
   void initState() {
-    // TODO: implement initState
     selected = this.widget.selected;
     super.initState();
   }
@@ -207,34 +216,50 @@ class __DayItemState extends State<_DayItem> {
   @override
   Widget build(BuildContext context) {
     final ButtonThemeData buttonTheme = ButtonTheme.of(context);
-
-    return RawMaterialButton(
-        onPressed: () {
-          if (widget.onTap != null) {
-            widget.onTap(widget.value);
-          }
-          setState(() {
-            selected = !selected;
-          });
-        },
-        focusColor: widget.selectedFillColor,
-        highlightColor: Colors.yellow,
-        splashColor: this.widget.splashColor,
-        elevation: this.widget.elevation,
-        constraints: BoxConstraints(minWidth: 40, minHeight: 40),
-        fillColor: selected == true
-            ? widget.selectedFillColor ?? buttonTheme.colorScheme.background
-            : widget.fillColor ?? buttonTheme.colorScheme.background,
-        textStyle: widget.textStyle ??
-            Theme.of(context)
-                .textTheme
-                .button, //if not textstyle sended, textTheme.button by default
-        child: Text(widget.label),
-        shape: RoundedRectangleBorder(
-            borderRadius: BorderRadius.circular(widget.borderRadius),
-            side: selected ? widget.borderSide : BorderSide.none));
+    return Container(
+      constraints: this.widget.boxConstraints,
+      child: RawMaterialButton(
+          onPressed: () {
+            if (widget.onTap != null) {
+              widget.onTap(widget.value);
+            }
+            setState(() {
+              selected = !selected;
+            });
+          },
+          focusColor: widget.selectedFillColor,
+          highlightColor: Colors.yellow,
+          splashColor: this.widget.splashColor,
+          elevation: this.widget.elevation,
+          fillColor: selected == true
+              ? widget.selectedFillColor ?? buttonTheme.colorScheme.background
+              : widget.fillColor ?? buttonTheme.colorScheme.background,
+          textStyle: widget.textStyle ??
+              Theme.of(context)
+                  .textTheme
+                  .button, //if not textstyle sended, textTheme.button by default
+          child: Container(
+              alignment: Alignment.center,
+              child: Text(widget.dayLong == null || widget.dayLong == 0
+                  ? widget.label.substring(0, 2)
+                  : widget.dayLong < widget.label.length
+                      ? widget.label.substring(0, widget.dayLong)
+                      : widget.label)),
+          shape: RoundedRectangleBorder(
+              borderRadius: BorderRadius.circular(widget.borderRadius),
+              side: selected ? widget.borderSide : BorderSide.none)),
+    );
   }
 }
 
 enum days { monday, tuesday, wednesday, thursday, friday, saturday, sunday }
 enum lang { en, es, pt }
+const languages = [
+  {lang.en: 'Monday', lang.es: 'Lunes', lang.pt: 'Segunda'}, // monday
+  {lang.en: 'Tuesday', lang.es: 'Martes', lang.pt: 'Terça'}, // tuesday
+  {lang.en: 'Wednesday ', lang.es: 'Miercoles', lang.pt: 'Quarta'}, // wednesday
+  {lang.en: 'Thursday', lang.es: 'Jueves', lang.pt: 'Quinta'}, // thursday
+  {lang.en: 'Friday', lang.es: 'Viernes', lang.pt: 'Sexta'}, // friday
+  {lang.en: 'Saturday', lang.es: 'Sabado', lang.pt: 'Sabado'}, // thursday
+  {lang.en: 'Sunday', lang.es: 'Domingo', lang.pt: 'Domingo'} // saturday
+];

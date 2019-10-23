@@ -1,7 +1,7 @@
 name: weekday_selector_formfield
 description: This widget allows the user to choose one or many weekdays. The selector is customizable and it has all the posibilities expected on a Form Field
-version: 1.0.0
-author: Andrés Raya
+version: 1.0.1
+author: Andres Raya <andres_raya1990@hotmail.com>
 homepage: https://www.linkedin.com/in/andres-raya-90898a10a/
 
 environment:
