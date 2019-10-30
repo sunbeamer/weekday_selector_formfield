@@ -18,6 +18,9 @@ WeekDaySelectorFormField()
 You can set the 'displayDay' attribute to choose the days you want to show. These days will appear in the same order of the array.
 Alternatively, you can set displayDays equal to WeekDayPicker.weekendDays or WeekDayPicker.workDays to show theese days. by default, the widget will show ALL weekDays
 
+Link to repository: 
+https://github.com/andreskiu/weekday_selector_formfield/tree/master/weekday_selector_formfield
+
 ```
 WeekDaySelectorFormField(
       displayDays: [days.monday, days.wednesday, days.friday],
