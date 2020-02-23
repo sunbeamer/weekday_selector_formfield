@@ -16,7 +16,8 @@ WeekDaySelectorFormField()
 
 ## Custom Example
 You can set the 'displayDay' attribute to choose the days you want to show. These days will appear in the same order of the array.
-Alternatively, you can set displayDays equal to WeekDayPicker.weekendDays or WeekDayPicker.workDays to show theese days. by default, the widget will show ALL weekDays
+Alternatively, you can set displayDays equal to WeekDayPicker.weekendDays or WeekDayPicker.workDays to show theese days. By default, the widget will show ALL weekDays.
+You can also set the 'minDaysSelected' attribute to the minimum number of days that must be selected. Setting this attribute will prevent deselection of already selected days, if doing so would result in the number of selected days being less than the the value of 'minDaysSelected'.
 
 Link to repository: 
 https://github.com/andreskiu/weekday_selector_formfield/tree/master/weekday_selector_formfield
@@ -25,6 +26,7 @@ https://github.com/andreskiu/weekday_selector_formfield/tree/master/weekday_sele
 WeekDaySelectorFormField(
       displayDays: [days.monday, days.wednesday, days.friday],
       initialValue: [days.monday],
+      minDaysSelected: 1,
       borderRadius: 20,
       selectedFillColor: Colors.orange,
       borderSide: BorderSide(color: Colors.red, width: 2),
