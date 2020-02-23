@@ -26,6 +26,7 @@ class WeekDaySelectorFormField extends StatefulWidget {
       this.splashColor,
       this.borderSide = const BorderSide(color: Colors.black, width: 1),
       this.initialValue,
+      this.minDaysSelected,
       this.textStyle = const TextStyle(color: Colors.black),
       this.errorTextStyle = const TextStyle(color: Colors.red),
       this.axis = Axis.horizontal,
@@ -41,6 +42,7 @@ class WeekDaySelectorFormField extends StatefulWidget {
       : super(key: key);
 
   final List<days> initialValue;
+  final int minDaysSelected;
   final void Function(List<days>) onChange;
   final void Function(List<days>) onSaved;
   final String Function(List<days>) validator;
@@ -86,12 +88,16 @@ class WeekDaySelectorFormField extends StatefulWidget {
 class _WeekDaySelectorFormFieldState extends State<WeekDaySelectorFormField> {
   List<Widget> displayedDays = [];
   List<days> daysSelected = [];
+  int minDaysSelected = 0;
 
   @override
   void initState() {
     super.initState();
     if (this.widget.initialValue != null)
       daysSelected = this.widget.initialValue;
+
+    if (this.widget.minDaysSelected != null)
+      minDaysSelected = this.widget.minDaysSelected;
 
     // create all DisplayDays
     this.widget.displayDays.forEach((day) {
@@ -120,15 +126,23 @@ class _WeekDaySelectorFormFieldState extends State<WeekDaySelectorFormField> {
     });
   }
 
-  _dayTap(days day) {
+  bool _dayTap(days day) {
+    bool updated = false;
+
     if (daysSelected.contains(day)) {
-      daysSelected.remove(day);
+      if (daysSelected.length > minDaysSelected) {
+        updated = true;
+        daysSelected.remove(day);
+      }
+
     } else {
       daysSelected.add(day);
+      updated = true;
     }
     if (widget.onChange != null) {
       widget.onChange(daysSelected);
     }
+    return updated;
   }
 
   @override
@@ -220,12 +234,15 @@ class __DayItemState extends State<_DayItem> {
       constraints: this.widget.boxConstraints,
       child: RawMaterialButton(
           onPressed: () {
-            if (widget.onTap != null) {
-              widget.onTap(widget.value);
-            }
-            setState(() {
-              selected = !selected;
-            });
+              bool updated;
+              if (widget.onTap != null) {
+                updated = widget.onTap(widget.value);
+              }
+              if (updated) {
+                setState(() {
+                selected = !selected;
+                });
+              }
           },
           focusColor: widget.selectedFillColor,
           highlightColor: Colors.yellow,
