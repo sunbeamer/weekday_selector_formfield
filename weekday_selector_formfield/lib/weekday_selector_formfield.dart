@@ -251,10 +251,7 @@ class __DayItemState extends State<_DayItem> {
           fillColor: selected == true
               ? widget.selectedFillColor ?? buttonTheme.colorScheme.background
               : widget.fillColor ?? buttonTheme.colorScheme.background,
-          textStyle: widget.textStyle ??
-              Theme.of(context)
-                  .textTheme
-                  .button, //if not textstyle sended, textTheme.button by default
+          textStyle: selected == true ? TextStyle(color: Colors.white) : TextStyle(color: Colors.black) ,
           child: Container(
               alignment: Alignment.center,
               child: Text(widget.dayLong == null || widget.dayLong == 0
